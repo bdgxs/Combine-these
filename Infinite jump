@@ -1,0 +1,33 @@
+local Mouse = game.Players.LocalPlayer:GetMouse()
+    local InfiniteJump = false
+
+    script.Parent.MouseButton1Click:Connect(function()
+        if InfiniteJump == false then
+            InfiniteJump = true
+            script.Parent.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+        else
+            InfiniteJump = false
+            script.Parent.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+        end
+    end)
+
+    Mouse.KeyDown:Connect(function(k)
+        if k == "v" then
+            if InfiniteJump == false then
+                InfiniteJump = true
+                script.Parent.BackgroundColor3 = Color3.fromRGB(0, 255, 0)
+            else
+                InfiniteJump = false
+                script.Parent.BackgroundColor3 = Color3.fromRGB(255, 0, 0)
+            end
+        end
+    end)
+
+    game:GetService("UserInputService").JumpRequest:Connect(function()
+        if InfiniteJump == true then
+            game:GetService "Players".LocalPlayer.Character:FindFirstChildOfClass 'Humanoid'
+                :ChangeState("Jumping")
+        end
+    end)
+end
+coroutine.wrap(setInfinityJumpButton)()
