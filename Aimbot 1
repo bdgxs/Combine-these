@@ -1,0 +1,88 @@
+local runService = game:GetService("RunService")
+local plrsService = game:GetService("Players")
+local enabled = false
+local teamcheck = false
+local aimpart = "Head"
+
+function lookAt(target, eye)
+	workspace.CurrentCamera.CFrame = CFrame.new(target, eye)
+end
+
+function getClosestPlayerToCursor(trg_part)
+	local nearest = nil
+	local last = math.huge
+
+	for i, v in ipairs(plrsService:GetPlayers()) do
+		if v ~= plrsService.LocalPlayer and plrsService.LocalPlayer.Character and plrsService.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid") and plrsService.LocalPlayer.Character:FindFirstChildWhichIsA("Humanoid").Health > 0
+			and v.Character and v.Character:FindFirstChildWhichIsA("Humanoid") and v.Character:FindFirstChildWhichIsA("Humanoid").Health > 0
+		then
+			local allowed = not teamcheck
+			if teamcheck and v.Team ~= plrsService.LocalPlayer.Team then
+				allowed = true
+			end
+			
+			if allowed then
+				local aimobj = v.Character:FindFirstChild(trg_part) or v.Character:FindFirstChild("UpperTorso")
+				if aimobj then
+					if plrsService.LocalPlayer.Character:FindFirstChild("Head") then
+						local ePos, vissss = workspace.CurrentCamera:WorldToViewportPoint(aimobj.Position)
+						local AccPos = Vector2.new(ePos.x, ePos.y)
+						local mousePos = Vector2.new(workspace.CurrentCamera.ViewportSize.x / 2, workspace.CurrentCamera.ViewportSize.y / 2)
+						local distance = (AccPos - mousePos).magnitude
+						if distance < last and vissss and distance < 400 then
+							last = distance
+							nearest = v
+						end
+					end
+				end
+			end
+		end
+	end
+	return nearest
+end
+
+local toggleBtn
+toggleBtn = addToggle("Toggle aimbot", function(state)
+	enabled = state
+end, false)
+
+local toggleTeamCheckBtn
+toggleTeamCheckBtn = addToggle("Team check", function(state)
+	teamcheck = state
+end)
+
+local aimPartCombo
+aimPartCombo = addComboBox("Aim part", {"Head", "Torso"}, function(selection)
+	aimpart = selection
+end)
+
+runService.RenderStepped:Connect(function()
+	local closest = getClosestPlayerToCursor(aimpart)
+	if enabled and closest then
+		local aimobj = closest.Character:FindFirstChild(aimpart) or closest.Character:FindFirstChild("UpperTorso") -- If not found then should be R15 Torso
+		if aimobj then
+			lookAt(workspace.CurrentCamera.CFrame.p, aimobj.Position)
+		end
+	end
+end)
+
+-- INIT
+
+Main:TweenPosition(
+	UDim2.fromScale(0.5, 0.5),
+	Enum.EasingDirection.In,
+	Enum.EasingStyle.Quad,
+	1, true, nil
+)
+
+task.wait(1.5)
+Logo:TweenSizeAndPosition(
+	UDim2.fromScale(0.175, 0.175),
+	UDim2.fromScale(0.075, 0.15),
+	Enum.EasingDirection.In,
+	Enum.EasingStyle.Quad,
+	1, true, nil
+)
+
+task.wait(1.5)
+TweenService:Create(Intro, TweenInfo.new(1, Enum.EasingStyle.Linear, Enum.EasingDirection.In), {BackgroundTransparency = 1}):Play()
